@@ -10,21 +10,52 @@ class PrimerAjuste(Algoritmo):
     def colocar(self, dato):
         # """Colocacion de bloques en memoria"""
         # raise NotImplementedError
-        bandera = False
-        global ultimo
-        if not self.memoria.datos and self.memoria.longitud >= dato.tamanio:
-            #Si la lista está vacía, se carga el primer dato en la posición cero
-            dato.inicio = 0
-            ultimo = dato.longitud - 1
+        FinMayor = 0
+        mem_insuficiente = 0
+        if self.memoria.datos == []:
+            if self.memoria.longitud >= dato.tamanio:
+                dato.inicio = 0
+                dato_fin = dato.tamanio - 1
+            else:
+                print "MEMORIA INSUFICIENTE"
         else:
-            #Sino, se recorre la memoria buscando el primer bloque en el que sea 
-            #posible guardar el dato
-            for posicion in self.memoria.datos:
-                if bandera == False:
-                    if posicion.id_proceso == None:
-                        libre = True
-                        #Se calcula el tamanio real del bloque
-                        tamanio = 
+            corte = False
+            while dato.inicio == None and corte == False:
+                c = 0       
+                for x in self.memoria.datos:
+                    c = c + 1
+                    if x.id_proceso == None and dato.tamanio <= x.tamanio and dato.inicio == None:
+                        dato.inicio = x.inicio 
+                        dato_fin = dato.inicio + dato.tamanio - 1
+                        if dato.tamanio < x.tamanio:
+                            x.inicio = dato_fin + 1
+                            x.tamanio = x.tamanio - dato.tamanio
+                        else:
+                            del self.memoria.datos[ c - 1 ]
+                     
+                if dato.inicio == None:
+                    Bandera = 0
+                    for x in self.memoria.datos:
+                        if Bandera == 0:
+                            FinMayor = x.tamanio - 1
+                            Bandera = 1
+                        else:
+                            if FinMayor < x.tamanio - 1:
+                                FinMayor = x.tamanio -1
+                    if self.memoria.longitud - FinMayor + 1 > dato.tamanio:
+                        dato.inicio = FinMayor + 1
+                        dato_fin = dato.inicio + dato.tamanio - 1
+                    # else:
+                    #     if mem_insuf == 0:
+                    #         memoria.compactar()
+                    #         print "Intento de Compactar"
+                    #     if mem_insuf == 1:
+                    #         memoria.combinar()
+                    #         print "Intento de Combinar"
+                    #     if mem_insuf ==2:
+                    #         print "MEMORIA INSUFICIENTE"
+                    #         corte = True
+                    #     mem_insuf=mem_insuf+1
 
 
 class MejorAjuste(Algoritmo):

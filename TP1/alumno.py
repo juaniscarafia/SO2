@@ -8,8 +8,23 @@ class PrimerAjuste(Algoritmo):
         super(PrimerAjuste, self).__init__("PrimerAjuste")
 
     def colocar(self, dato):
-        """Colocacion de bloques en memoria"""
-        raise NotImplementedError
+        # """Colocacion de bloques en memoria"""
+        # raise NotImplementedError
+        bandera = False
+        global ultimo
+        if not self.memoria.datos and self.memoria.longitud >= dato.tamanio:
+            #Si la lista está vacía, se carga el primer dato en la posición cero
+            dato.inicio = 0
+            ultimo = dato.longitud - 1
+        else:
+            #Sino, se recorre la memoria buscando el primer bloque en el que sea 
+            #posible guardar el dato
+            for posicion in self.memoria.datos:
+                if bandera == False:
+                    if posicion.id_proceso == None:
+                        libre = True
+                        #Se calcula el tamanio real del bloque
+                        tamanio = 
 
 
 class MejorAjuste(Algoritmo):

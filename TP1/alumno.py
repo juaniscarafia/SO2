@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pickle
 from catedra import Bloque, Algoritmo, Memoria, SOException
 
@@ -8,54 +9,61 @@ class PrimerAjuste(Algoritmo):
         super(PrimerAjuste, self).__init__("PrimerAjuste")
 
     def colocar(self, dato):
-        # """Colocacion de bloques en memoria"""
-        # raise NotImplementedError
-        FinMayor = 0
-        mem_insuficiente = 0
-        if self.memoria.datos == []:
-            if self.memoria.longitud >= dato.tamanio:
-                dato.inicio = 0
-                dato_fin = dato.tamanio - 1
-            else:
-                print "MEMORIA INSUFICIENTE"
+        bandera = False
+        libre = False
+        global ultimo
+        if not self.memoria.datos and self.memoria.longitud >= dato.tamanio:
+            #si la lista está vacía, se carga el primer dato en la posicion cero
+            dato.inicio = 0
+            dato_fin = dato.tamanio - 1
+            ultimo = dato_fin
         else:
-            corte = False
-            while dato.inicio == None and corte == False:
-                c = 0       
-                for x in self.memoria.datos:
-                    c = c + 1
-                    if x.id_proceso == None and dato.tamanio <= x.tamanio and dato.inicio == None:
-                        dato.inicio = x.inicio 
-                        dato_fin = dato.inicio + dato.tamanio - 1
-                        if dato.tamanio < x.tamanio:
-                            x.inicio = dato_fin + 1
-                            x.tamanio = x.tamanio - dato.tamanio
-                        else:
-                            del self.memoria.datos[ c - 1 ]
-                     
-                if dato.inicio == None:
-                    Bandera = 0
-                    for x in self.memoria.datos:
-                        if Bandera == 0:
-                            FinMayor = x.tamanio - 1
-                            Bandera = 1
-                        else:
-                            if FinMayor < x.tamanio - 1:
-                                FinMayor = x.tamanio -1
-                    if self.memoria.longitud - FinMayor + 1 > dato.tamanio:
-                        dato.inicio = FinMayor + 1
-                        dato_fin = dato.inicio + dato.tamanio - 1
-                    # else:
-                    #     if mem_insuf == 0:
-                    #         memoria.compactar()
-                    #         print "Intento de Compactar"
-                    #     if mem_insuf == 1:
-                    #         memoria.combinar()
-                    #         print "Intento de Combinar"
-                    #     if mem_insuf ==2:
-                    #         print "MEMORIA INSUFICIENTE"
-                    #         corte = True
-                    #     mem_insuf=mem_insuf+1
+            #sino, se recorre la memoria buscando el primer bloque en el que sea posible
+            #guardar el dato
+            for pos in self.memoria.datos:
+                if bandera == False:
+                    if pos.id_proceso == None:
+                        libre = True
+                        #se calcula el tamanio real del bloque
+                        tamanio = pos.tamanio - pos.inicio + 1
+                        if tamanio >= dato.tamanio:
+                            dato.inicio = pos.inicio
+                            dato_fin = pos.tamanio
+                            indice = self.memoria.datos.index(pos)
+                            #se elimina la posicion de la lista para evitar repeticiones
+                            #de bloques
+                            del self.memoria.datos[indice]
+                            bandera = True
+            if bandera == False:
+                #si no hay ningun bloque disponible para guardar, se opta por optimizar antes de
+                #crear un bloque nuevo
+                if libre == True:
+                    #si existen bloques vacios se optimiza
+                    self.memoria.combinar()
+                    self.memoria.compactar()
+                    #se vuelve a recorrer la lista, buscando un bloque para colocar el dato
+                    for pos in self.memoria.datos:
+                        if bandera == False:
+                            if pos.id_proceso == None:
+                                tamanio = pos.tamanio - pos.inicio + 1
+                                if tamanio >= dato.tamanio:
+                                    dato.inicio = pos.inicio
+                                    dato_fin = pos.tamanio
+                                    indice = self.memoria.datos.index(pos)
+                                    del self.memoria.datos[indice]
+                                    bandera = True
+                if bandera == False:
+                    #si trata de optimizar, y aun asi no puede colocar el dato, o si no hay
+                    #ningun bloque vacio, y no es posible optimizar, se crea uno nuevo en caso
+                    #de que haya memoria suficiente
+                    if memoria.longitud >= dato.tamanio:                  
+                        dato.inicio = ultimo + 1
+                        dato_fin = (dato.inicio + (dato.tamanio - 1))
+                        ultimo = dato_fin
+                        bandera = True
+                    else:
+                        #si no hay espacio en la memoria, se larga una excepcion
+                        raise SOException("Memoria insuficiente")
 
 
 class MejorAjuste(Algoritmo):
@@ -81,17 +89,51 @@ class PeorAjuste(Algoritmo):
 class MemoriaAlumno(Memoria):
 
     def combinar(self):
-        """Combinar bloques adyasentes"""
-        raise NotImplementedError
+        #se calcula el numero de bloques para evitar exceder el rango de la lista
+        numero_bloques = len(self.datos) 
+        #se ordena la lista en forma ascendente por inicio
+        self.datos = sorted(self.datos, key=lambda datos: datos.inicio)
+        for pos in self.datos[:]:
+            #se recorre la lista ya ordenada de inicio a fin, buscando bloques vacios adyacentes
+            actual = self.datos.index(pos)
+            siguiente = actual + 1
+            if siguiente < numero_bloques:
+                if self.datos[actual].id_proceso == None and self.datos[siguiente].id_proceso == None:
+                    #se actualizan los valores de uno de los bloques, y se elimina el otro
+                    self.datos[siguiente].inicio = self.datos[actual].inicio
+                    self.datos[siguiente].tamanio = self.datos[actual].tamanio + self.datos[siguiente].tamanio
+                    del self.datos[actual]
+                    #como hay una eliminacion, se calcula nuevamente el numero de bloques
+                    numero_bloques = len(self.datos)
 
     def compactar(self):
-        """Compactar bloques (defragmentar)"""
-        raise NotImplementedError
+        #se calcula el numero de bloques para evitar exceder el rango de la lista
+        numero_bloques = len(self.datos)
+        #se ordena la lista en forma ascendente por inicio
+        self.datos = sorted(self.datos, key=lambda datos: datos.inicio)
+        for pos in self.datos[:]:
+            #se recorre la lista ya ordenada, de inicio a fin, buscando bloques vacios separados
+            #por bloques ocupados
+            actual = self.datos.index(pos)
+            siguiente = actual + 1
+            if siguiente < numero_bloques:
+                if self.datos[actual].id_proceso == None and not self.datos[siguiente].id_proceso == None:
+                    #se hace el corrimiento de datos, para que el bloque ocupado quede en primer lugar (antes
+                    #que el vacio)
+                    tamanio = self.datos[siguiente].tamanio - self.datos[siguiente].inicio + 1
+                    self.datos[siguiente].inicio = self.datos[actual].inicio
+                    self.datos[siguiente].tamanio = (self.datos[siguiente].inicio + (tamanio - 1))
+                    tamanio = self.datos[actual].tamanio - self.datos[actual].inicio + 1
+                    self.datos[actual].inicio = self.datos[siguiente].tamanio + 1
+                    self.datos[actual].tamanio = (self.datos[actual].inicio + (tamanio - 1))
+        #se llama a la funcion combinar para acomodar los bloques vacios ahora adyacentes
+        self.combinar()
 
 
 if __name__ == '__main__':
 
-    for algoritmo in [PrimerAjuste(), MejorAjuste(), PeorAjuste()]:
+    for algoritmo in [PrimerAjuste()]:
+        #, MejorAjuste(), PeorAjuste()
         try:
             print "*" * 80
             print "Ejecutando con: %s" % algoritmo
@@ -188,7 +230,7 @@ if __name__ == '__main__':
 
             # Descomentar las llamadas a las funciones una vez condificadas
             # Combinar
-            # memoria.combinar()
+            memoria.combinar()
             # Compactar
             # memoria.compactar()
         except NotImplementedError:

@@ -72,8 +72,84 @@ class MejorAjuste(Algoritmo):
         super(MejorAjuste, self).__init__("MejorAjuste")
 
     def colocar(self, dato):
-        """Colocacion de bloques en memoria"""
-        raise NotImplementedError
+        optimo = False
+        bandera = False
+        libre = False
+        global ultimo
+        if not self.memoria.datos and self.memoria.longitud >= dato.tamanio:
+            #si la lista está vacía, se carga el primer dato en la posicion cero
+            dato.inicio = 0
+            dato_fin = dato.tamanio - 1
+            ultimo = dato_fin
+        else:
+            mejor = 1000
+            for pos in self.memoria.datos:
+                #se recorre la memoria buscando el bloque que genere menor desperdicio
+                if optimo == False:
+                    #tamanio real del bloque
+                    tamanio = pos.tamanio - pos.inicio + 1
+                    if pos.id_proceso == None:
+                        libre = True
+                        if tamanio >= dato.tamanio:
+                            if tamanio == dato.tamanio:
+                                #si se encuentra un bloque que no genere nada de desperdicio
+                                #se detiene la búsqueda
+                                mejor = pos.tamanio
+                                posicion = pos
+                                optimo = True
+                            elif mejor > tamanio:
+                                mejor = pos.tamanio
+                                posicion = pos
+                                bandera = True
+            if optimo == True or bandera == True:
+                #si se encuentra alguna posicion de memoria disponible para el dato, este se guarda
+                dato.inicio = posicion.inicio
+                dato_fin = posicion.tamanio
+                indice = self.memoria.datos.index(posicion)
+                #se elimina la posicion de la lista para evitar repeticiones
+                #de bloques
+                del self.memoria.datos[indice]
+            else:
+                #si no hay bloques disponibles, se intenta optimizar
+                optimo = False
+                bandera = False
+                if libre == True:
+                    #si existen bloques vacios se optimiza
+                    self.memoria.combinar()
+                    self.memoria.compactar()
+                    mejor = 1000
+                    for pos in self.memoria.datos:
+                        #vuelve a recorrerse la memoria
+                        if optimo == False:
+                            tamanio = pos.tamanio - pos.inicio + 1
+                            if pos.id_proceso == None and tamanio >= dato.tamanio:
+                                if tamanio == dato.tamanio:
+                                    mejor = pos.tamanio
+                                    posicion = pos
+                                    optimo = True
+                                elif mejor > tamanio:
+                                    mejor = pos.tamanio
+                                    posicion = pos
+                                    bandera = True
+                    if optimo == True or bandera == True:
+                        #nuevamente, si se encuentra lugar, se guarda el dato
+                        dato.inicio = posicion.inicio
+                        dato_fin = posicion.tamanio
+                        indice = self.memoria.datos.index(posicion)
+                        del self.memoria.datos[indice]
+                if bandera == False and optimo == False:
+                    #si trata de optimizar, y aun asi no puede colocar el dato, o si no hay
+                    #ningun bloque vacio, y no es posible optimizar, se crea uno nuevo en caso
+                    #de que haya memoria suficiente
+                    if memoria.longitud >= (ultimo + dato.tamanio):
+                        dato.inicio = ultimo + 1
+                        dato_fin = (dato.inicio + (dato.tamanio - 1))
+                        ultimo = dato.tamanio
+                        bandera = True
+                    else:
+                        #si no hay espacio en la memoria, se larga una excepcion
+                        raise SOException("Memoria insuficiente")
+
 
 
 class PeorAjuste(Algoritmo):
@@ -132,8 +208,8 @@ class MemoriaAlumno(Memoria):
 
 if __name__ == '__main__':
 
-    for algoritmo in [PrimerAjuste()]:
-        #, MejorAjuste(), PeorAjuste()
+    for algoritmo in [PrimerAjuste(), MejorAjuste()]:
+        #, PeorAjuste()
         try:
             print "*" * 80
             print "Ejecutando con: %s" % algoritmo

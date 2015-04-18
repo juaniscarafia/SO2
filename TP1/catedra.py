@@ -101,8 +101,8 @@ class Memoria(object):
 
     def liberar(self, bloque):
         """Libera el bloque de moria especificado"""
-        if bloque.inicio is None:
-            raise SOException("El bloque indicado no se encuentra en memoria.")
+        if bloque.inicio is None or bloque.id_proceso is None:
+            print SOException("El bloque indicado no se encuentra en memoria.")
         else:
             self.valores = (
                 self.valores[:bloque.inicio] + " " * bloque.tamanio +

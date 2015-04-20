@@ -71,7 +71,7 @@ class MejorAjuste(Algoritmo):
     def __init__(self):
         super(MejorAjuste, self).__init__("MejorAjuste")
 
-    def colocar(self, dato):
+    def colocar (self, dato):
         optimo = False
         bandera = False
         libre = False
@@ -144,7 +144,7 @@ class MejorAjuste(Algoritmo):
                     if memoria.longitud >= (ultimo + dato.tamanio):
                         dato.inicio = ultimo + 1
                         dato_fin = (dato.inicio + (dato.tamanio - 1))
-                        ultimo = dato.tamanio
+                        ultimo = dato_fin
                         bandera = True
                     else:
                         #si no hay espacio en la memoria, se larga una excepcion

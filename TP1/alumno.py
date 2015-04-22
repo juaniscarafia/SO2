@@ -157,9 +157,66 @@ class PeorAjuste(Algoritmo):
     def __init__(self):
         super(PeorAjuste, self).__init__("PeorAjuste")
 
-    def colocar(self, dato):
-        """Colocacion de bloques en memoria"""
-        raise NotImplementedError
+    def colocar (self, dato):
+        bandera = False
+        libre = False
+        global ultimo
+        if not self.memoria.datos and self.memoria.longitud >= dato.tamanio:
+            #si la lista está vacía, se carga el primer dato en la posicion cero
+            dato.inicio = 0
+            dato_fin = dato.tamanio - 1
+            ultimo = dato_fin
+        else:
+            peor = 0
+            for pos in self.memoria.datos:
+                #se recorre la memoria buscando el bloque que genere el mayor desperdicio
+                tamanio = pos.tamanio - pos.inicio + 1
+                if pos.id_proceso == None:
+                    libre = True
+                    if tamanio >= dato.tamanio:
+                        if peor < tamanio:
+                            peor = pos.tamanio
+                            posicion = pos
+                            bandera = True
+            if bandera == True:
+                #si se encuentra un bloque, se guarda el dato
+                dato.inicio = posicion.inicio
+                dato_fin = posicion.tamanio
+                indice = self.memoria.datos.index(posicion)
+                #se elimina la posicion de la lista para evitar repeticiones
+                #de bloques
+                del self.memoria.datos[indice]
+            else:
+                if libre == True:
+                    #si existen bloques vacios se optimiza
+                    self.memoria.combinar()
+                    self.memoria.compactar()
+                    peor = 0
+                    for pos in self.memoria.datos:
+                        #se recorre nuevamente la lista de bloques
+                        tamanio = pos.tamanio - pos.inicio + 1
+                        if pos.id_proceso == None and tamanio >= dato.tamanio:
+                            if peor < tamanio:
+                                peor = pos.tamanio
+                                posicion = pos
+                                bandera = True
+                    if bandera == True:
+                        dato.inicio = posicion.inicio
+                        dato_fin = posicion.tamanio
+                        indice = self.memoria.datos.index(posicion)
+                        del self.memoria.datos[indice]
+                if bandera == False:
+                    #si trata de optimizar, y aun asi no puede colocar el dato, o si no hay
+                    #ningun bloque vacio, y no es posible optimizar, se crea uno nuevo en caso
+                    #de que haya memoria suficiente
+                    if memoria.longitud >= (ultimo + dato.tamanio):                  
+                        dato.inicio = ultimo + 1
+                        dato_fin = (dato.inicio + (dato.tamanio - 1))
+                        ultimo = dato_fin
+                        bandera = True
+                    else:
+                        #si no hay espacio en la memoria, se larga una excepcion
+                        raise SOException("Memoria insuficiente")
 
 
 class MemoriaAlumno(Memoria):
@@ -208,8 +265,7 @@ class MemoriaAlumno(Memoria):
 
 if __name__ == '__main__':
 
-    for algoritmo in [PrimerAjuste(), MejorAjuste()]:
-        #, PeorAjuste()
+    for algoritmo in [PrimerAjuste(), MejorAjuste(), PeorAjuste()]:
         try:
             print "*" * 80
             print "Ejecutando con: %s" % algoritmo
@@ -308,6 +364,6 @@ if __name__ == '__main__':
             # Combinar
             memoria.combinar()
             # Compactar
-            # memoria.compactar()
+            memoria.compactar()
         except NotImplementedError:
             print "El algoritmo no esta implementado"

@@ -1,0 +1,46 @@
+Ejecutando con: <Algoritmo | PrimerAjuste, memoria: >
+
+Cargando los datos generales
+Estado inicial de la memoria
+<Memoria | 111223333455                                       50>
+
+Liberar <Bloque | proceso: 2, memoria: 3 (+2)>
+<Memoria | 111  3333455                                       50>
+
+Colocar <Bloque | proceso: 6, memoria: None (+2)>
+<Memoria | 111663333455                                       50>
+
+Liberar <Bloque | proceso: 6, memoria: 3 (+2)>
+Liberar <Bloque | proceso: 3, memoria: 5 (+4)>
+Liberar <Bloque | proceso: 5, memoria: 10 (+2)>
+<Memoria | 111      4                                         50>
+
+Colocar <Bloque | proceso: 7, memoria: None (+4)>
+<Memoria | 111  77774                                         50>
+
+Colocar <Bloque | proceso: 8, memoria: None (+2)>
+<Memoria | 111  7777488                                       50>
+
+Colocar <Bloque | proceso: 9, memoria: None (+10)>
+<Memoria | 111  77774889999999999                             50>
+
+Liberar <Bloque | proceso: 8, memoria: 10 (+2)>
+<Memoria | 111  77774  9999999999                             50>
+
+Colocar <Bloque | proceso: 0, memoria: None (+2)>
+<Memoria | 111  77004  9999999999                             50>
+
+Colocar <Bloque | proceso: A, memoria: None (+2)>
+<Memoria | 111  77004AA9999999999                             50>
+
+Colocar <Bloque | proceso: X, memoria: None (+200)>
+<ERROR: Memoria insuficiente>
+<Memoria | 111  77004AA9999999999                             50>
+
+Colocar <Bloque | proceso: Y, memoria: None (+88)>
+<ERROR: Memoria insuficiente>
+<Memoria | 111  77004AA9999999999                             50>
+
+Colocar <Bloque | proceso: Z, memoria: None (+20)>
+<Memoria | 111  77004AA9999999999ZZZZZZZZZZZZZZZZZZZZ         50>
+********************************************************************************

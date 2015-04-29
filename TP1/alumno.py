@@ -8,15 +8,15 @@ class PrimerAjuste(Algoritmo):
     def __init__(self):
         super(PrimerAjuste, self).__init__("PrimerAjuste")
 
-    def colocar(self, dato):
+    def colocar (self, dato):
         bandera = False
         libre = False
         global ultimo
         if not self.memoria.datos and self.memoria.longitud >= dato.tamanio:
             #si la lista está vacía, se carga el primer dato en la posicion cero
             dato.inicio = 0
-            dato_fin = dato.tamanio - 1
-            ultimo = dato_fin
+            dato.fin = dato.tamanio - 1
+            ultimo = dato.fin
         else:
             #sino, se recorre la memoria buscando el primer bloque en el que sea posible
             #guardar el dato
@@ -25,10 +25,10 @@ class PrimerAjuste(Algoritmo):
                     if pos.id_proceso == None:
                         libre = True
                         #se calcula el tamanio real del bloque
-                        tamanio = pos.tamanio - pos.inicio + 1
+                        tamanio = pos.fin - pos.inicio + 1
                         if tamanio >= dato.tamanio:
                             dato.inicio = pos.inicio
-                            dato_fin = pos.tamanio
+                            dato.fin = pos.fin
                             indice = self.memoria.datos.index(pos)
                             #se elimina la posicion de la lista para evitar repeticiones
                             #de bloques
@@ -45,10 +45,10 @@ class PrimerAjuste(Algoritmo):
                     for pos in self.memoria.datos:
                         if bandera == False:
                             if pos.id_proceso == None:
-                                tamanio = pos.tamanio - pos.inicio + 1
+                                tamanio = pos.fin - pos.inicio + 1
                                 if tamanio >= dato.tamanio:
                                     dato.inicio = pos.inicio
-                                    dato_fin = pos.tamanio
+                                    dato.fin = pos.fin
                                     indice = self.memoria.datos.index(pos)
                                     del self.memoria.datos[indice]
                                     bandera = True
@@ -56,10 +56,10 @@ class PrimerAjuste(Algoritmo):
                     #si trata de optimizar, y aun asi no puede colocar el dato, o si no hay
                     #ningun bloque vacio, y no es posible optimizar, se crea uno nuevo en caso
                     #de que haya memoria suficiente
-                    if memoria.longitud >= dato.tamanio:                  
+                    if memoria.longitud >= (ultimo + dato.tamanio):                  
                         dato.inicio = ultimo + 1
-                        dato_fin = (dato.inicio + (dato.tamanio - 1))
-                        ultimo = dato_fin
+                        dato.fin = (dato.inicio + (dato.tamanio - 1))
+                        ultimo = dato.fin
                         bandera = True
                     else:
                         #si no hay espacio en la memoria, se larga una excepcion
@@ -79,15 +79,15 @@ class MejorAjuste(Algoritmo):
         if not self.memoria.datos and self.memoria.longitud >= dato.tamanio:
             #si la lista está vacía, se carga el primer dato en la posicion cero
             dato.inicio = 0
-            dato_fin = dato.tamanio - 1
-            ultimo = dato_fin
+            dato.fin = dato.tamanio - 1
+            ultimo = dato.fin
         else:
             mejor = 1000
             for pos in self.memoria.datos:
                 #se recorre la memoria buscando el bloque que genere menor desperdicio
                 if optimo == False:
                     #tamanio real del bloque
-                    tamanio = pos.tamanio - pos.inicio + 1
+                    tamanio = pos.fin - pos.inicio + 1
                     if pos.id_proceso == None:
                         libre = True
                         if tamanio >= dato.tamanio:
@@ -104,7 +104,7 @@ class MejorAjuste(Algoritmo):
             if optimo == True or bandera == True:
                 #si se encuentra alguna posicion de memoria disponible para el dato, este se guarda
                 dato.inicio = posicion.inicio
-                dato_fin = posicion.tamanio
+                dato.fin = posicion.fin
                 indice = self.memoria.datos.index(posicion)
                 #se elimina la posicion de la lista para evitar repeticiones
                 #de bloques
@@ -121,7 +121,7 @@ class MejorAjuste(Algoritmo):
                     for pos in self.memoria.datos:
                         #vuelve a recorrerse la memoria
                         if optimo == False:
-                            tamanio = pos.tamanio - pos.inicio + 1
+                            tamanio = pos.fin - pos.inicio + 1
                             if pos.id_proceso == None and tamanio >= dato.tamanio:
                                 if tamanio == dato.tamanio:
                                     mejor = pos.tamanio
@@ -134,7 +134,7 @@ class MejorAjuste(Algoritmo):
                     if optimo == True or bandera == True:
                         #nuevamente, si se encuentra lugar, se guarda el dato
                         dato.inicio = posicion.inicio
-                        dato_fin = posicion.tamanio
+                        dato.fin = posicion.fin
                         indice = self.memoria.datos.index(posicion)
                         del self.memoria.datos[indice]
                 if bandera == False and optimo == False:
@@ -143,13 +143,12 @@ class MejorAjuste(Algoritmo):
                     #de que haya memoria suficiente
                     if memoria.longitud >= (ultimo + dato.tamanio):
                         dato.inicio = ultimo + 1
-                        dato_fin = (dato.inicio + (dato.tamanio - 1))
-                        ultimo = dato_fin
+                        dato.fin = (dato.inicio + (dato.tamanio - 1))
+                        ultimo = dato.fin
                         bandera = True
                     else:
                         #si no hay espacio en la memoria, se larga una excepcion
                         raise SOException("Memoria insuficiente")
-
 
 
 class PeorAjuste(Algoritmo):
@@ -164,13 +163,13 @@ class PeorAjuste(Algoritmo):
         if not self.memoria.datos and self.memoria.longitud >= dato.tamanio:
             #si la lista está vacía, se carga el primer dato en la posicion cero
             dato.inicio = 0
-            dato_fin = dato.tamanio - 1
-            ultimo = dato_fin
+            dato.fin = dato.tamanio - 1
+            ultimo = dato.fin
         else:
             peor = 0
             for pos in self.memoria.datos:
                 #se recorre la memoria buscando el bloque que genere el mayor desperdicio
-                tamanio = pos.tamanio - pos.inicio + 1
+                tamanio = pos.fin - pos.inicio + 1
                 if pos.id_proceso == None:
                     libre = True
                     if tamanio >= dato.tamanio:
@@ -181,7 +180,7 @@ class PeorAjuste(Algoritmo):
             if bandera == True:
                 #si se encuentra un bloque, se guarda el dato
                 dato.inicio = posicion.inicio
-                dato_fin = posicion.tamanio
+                dato.fin = posicion.fin
                 indice = self.memoria.datos.index(posicion)
                 #se elimina la posicion de la lista para evitar repeticiones
                 #de bloques
@@ -194,7 +193,7 @@ class PeorAjuste(Algoritmo):
                     peor = 0
                     for pos in self.memoria.datos:
                         #se recorre nuevamente la lista de bloques
-                        tamanio = pos.tamanio - pos.inicio + 1
+                        tamanio = pos.fin - pos.inicio + 1
                         if pos.id_proceso == None and tamanio >= dato.tamanio:
                             if peor < tamanio:
                                 peor = pos.tamanio
@@ -202,7 +201,7 @@ class PeorAjuste(Algoritmo):
                                 bandera = True
                     if bandera == True:
                         dato.inicio = posicion.inicio
-                        dato_fin = posicion.tamanio
+                        dato.fin = posicion.fin
                         indice = self.memoria.datos.index(posicion)
                         del self.memoria.datos[indice]
                 if bandera == False:
@@ -211,8 +210,8 @@ class PeorAjuste(Algoritmo):
                     #de que haya memoria suficiente
                     if memoria.longitud >= (ultimo + dato.tamanio):                  
                         dato.inicio = ultimo + 1
-                        dato_fin = (dato.inicio + (dato.tamanio - 1))
-                        ultimo = dato_fin
+                        dato.fin = (dato.inicio + (dato.tamanio - 1))
+                        ultimo = dato.fin
                         bandera = True
                     else:
                         #si no hay espacio en la memoria, se larga una excepcion
@@ -253,12 +252,12 @@ class MemoriaAlumno(Memoria):
                 if self.datos[actual].id_proceso == None and not self.datos[siguiente].id_proceso == None:
                     #se hace el corrimiento de datos, para que el bloque ocupado quede en primer lugar (antes
                     #que el vacio)
-                    tamanio = self.datos[siguiente].tamanio - self.datos[siguiente].inicio + 1
+                    tamanio = self.datos[siguiente].fin - self.datos[siguiente].inicio + 1
                     self.datos[siguiente].inicio = self.datos[actual].inicio
-                    self.datos[siguiente].tamanio = (self.datos[siguiente].inicio + (tamanio - 1))
-                    tamanio = self.datos[actual].tamanio - self.datos[actual].inicio + 1
-                    self.datos[actual].inicio = self.datos[siguiente].tamanio + 1
-                    self.datos[actual].tamanio = (self.datos[actual].inicio + (tamanio - 1))
+                    self.datos[siguiente].fin = (self.datos[siguiente].inicio + (tamanio - 1))
+                    tamanio = self.datos[actual].fin - self.datos[actual].inicio + 1
+                    self.datos[actual].inicio = self.datos[siguiente].fin + 1
+                    self.datos[actual].fin = (self.datos[actual].inicio + (tamanio - 1))
         #se llama a la funcion combinar para acomodar los bloques vacios ahora adyacentes
         self.combinar()
 

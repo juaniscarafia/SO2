@@ -20,7 +20,8 @@ def main():
     for prueba in pruebas:
         print "*" * 80
         print u"  Páginas: %s" % prueba.paginas
-        for algoritmo in [Optimo, LRU, FIFO, Reloj]:
+        #Optimo, LRU, FIFO, Reloj
+        for algoritmo in [LRU]:
             try:
                 a = algoritmo(prueba.marcos)
                 print "\nEjecutando %s" % a

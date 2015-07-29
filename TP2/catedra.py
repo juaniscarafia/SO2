@@ -34,7 +34,7 @@ class Algoritmo(object):
         if len(self.historia) > 0:
             for l in range(len(self.historia[0])):
                 for m in self.historia + [self.marcos, ]:
-                    print m[l],
+					print m[l],
                 print ""
             print "-" * 80
 
